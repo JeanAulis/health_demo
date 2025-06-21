@@ -55,13 +55,19 @@
                     axios.post('/user/login', this.user).then(res => {
                         console.log(res.data);
                         if(res.data.flag) {
-                            //把登录成功的用户信息保存到LocalStorage中
-                            localStorage.setItem('token', JSON.stringify(res.data.data));
-                            window.location.href='/backend/pages/main.html';
+                            // 获取UUID token并保存到LocalStorage中
+                            const token = res.data.data;
+                            localStorage.setItem('userToken', token);
+                            // 跳转到主页并将token添加到URL路径中
+                            window.location.href='/backend/pages/main.html?token=' + token;
                         } else {
                             this.$message.error(res.data.message);
                             this.user = {};
                         }
+                    }).catch(error => {
+                        console.error('登录请求失败:', error);
+                        this.$message.error('登录失败，请稍后再试');
+                        this.user = {};
                     });
                 }
             }
