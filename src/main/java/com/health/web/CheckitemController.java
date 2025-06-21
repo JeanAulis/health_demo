@@ -29,7 +29,6 @@ public class CheckitemController {
     public Result add(@RequestBody Checkitem checkitem){
         log.info("新增检查项请求，参数：{}", checkitem);
 
-        Result result = checkitemService.add(checkitem);
-        return Result.success(result);
+        return checkitemService.add(checkitem);
     }
 }
