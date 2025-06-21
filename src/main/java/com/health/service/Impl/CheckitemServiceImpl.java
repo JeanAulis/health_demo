@@ -36,8 +36,13 @@ public class CheckitemServiceImpl implements CheckitemService {
             LambdaQueryWrapper<Checkitem> wrapper = new LambdaQueryWrapper<>();
             // 根据名称模糊查询（如果查询条件不为空）
             wrapper.like(StrUtil.isNotBlank(pageQueryDTO.getName()), Checkitem::getName, pageQueryDTO.getName());
-            // 也可以根据 queryString 进行查询
-            wrapper.like(StrUtil.isNotBlank(pageQueryDTO.getQueryString()), Checkitem::getName, pageQueryDTO.getQueryString());
+            
+            // 根据 queryString 进行查询（支持项目编码或项目名称）
+            if (StrUtil.isNotBlank(pageQueryDTO.getQueryString())) {
+                wrapper.and(w -> w.like(Checkitem::getCode, pageQueryDTO.getQueryString())
+                                 .or()
+                                 .like(Checkitem::getName, pageQueryDTO.getQueryString()));
+            }
             
             // 执行分页查询
             IPage<Checkitem> pageResult = checkitemMapper.selectPage(page, wrapper);
@@ -55,5 +60,14 @@ public class CheckitemServiceImpl implements CheckitemService {
             log.error("分页查询检查项失败: {}", errorMessage, e);
             return Result.error("查询失败：" + errorMessage);
         }
+    }
+
+    @Override
+    public Result add(Checkitem checkitem) {
+
+
+
+
+        return null;
     }
 }

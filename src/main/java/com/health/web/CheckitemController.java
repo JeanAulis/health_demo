@@ -1,5 +1,6 @@
 package com.health.web;
 
+import com.health.domain.entity.Checkitem;
 import com.health.domain.query.PageQueryDTO;
 import com.health.domain.vo.Result;
 import com.health.service.CheckitemService;
@@ -23,5 +24,12 @@ public class CheckitemController {
         return checkitemService.findPage(pageQueryDTO);
     }
 
-    // 根据UserName查询检查项
+    // 新增检查项数据
+    @PostMapping("/checkitem/add")
+    public Result add(@RequestBody Checkitem checkitem){
+        log.info("新增检查项请求，参数：{}", checkitem);
+
+        Result result = checkitemService.add(checkitem);
+        return Result.success(result);
+    }
 }
