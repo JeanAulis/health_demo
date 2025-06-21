@@ -1,6 +1,7 @@
 package com.health.web.login;
 
 import com.health.domain.dto.LoginDTO;
+import com.health.domain.entity.User;
 import com.health.domain.vo.Result;
 import com.health.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -9,11 +10,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpSession;
+
 @Slf4j
 @RestController
 public class UserCotroller {
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private HttpSession session;
 
     @PostMapping("/user/login")
     public Result login(@RequestBody LoginDTO loginDTO) {

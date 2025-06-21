@@ -16,20 +16,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class Result<T> {
-
-    /**
-     * 成功返回true，失败返回false
-     */
     private boolean flag;
-
-    /**
-     * 附加消息
-     */
     private String message;
-
-    /**
-     * 附加数据
-     */
     private T data;
 
     public static <T> Result<T> success(){
@@ -51,5 +39,4 @@ public class Result<T> {
     public static <T> Result<T> error(String message){
         return new Result<>(false, message, null);
     }
-
 }
