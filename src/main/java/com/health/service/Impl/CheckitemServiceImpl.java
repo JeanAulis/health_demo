@@ -11,7 +11,6 @@ import com.health.domain.vo.Result;
 import com.health.mapper.CheckitemMapper;
 import com.health.service.CheckitemService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,10 +63,34 @@ public class CheckitemServiceImpl implements CheckitemService {
 
     @Override
     public Result add(Checkitem checkitem) {
+        log.info("新增检查项，参数：{}", checkitem);
 
+        try {
+            // 检查项目编码是否已存在
+            LambdaQueryWrapper<Checkitem> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Checkitem::getCode, checkitem.getCode());
+            Checkitem existingItem = checkitemMapper.selectOne(wrapper);
 
+            if (existingItem != null) {
+                log.warn("检查项编码已存在：{}", checkitem.getCode());
+                return Result.error("检查项编码已存在，请使用其他编码");
+            }
 
+            // 执行新增操作
+            int result = checkitemMapper.insert(checkitem);
 
-        return null;
+            if (result > 0) {
+                log.info("新增检查项成功，ID：{}", checkitem.getId());
+                return Result.success("新增检查项成功");
+            } else {
+                log.error("新增检查项失败，数据库操作返回0");
+                return Result.error("新增检查项失败");
+            }
+
+        } catch (Exception e) {
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
+            log.error("新增检查项失败: {}", errorMessage, e);
+            return Result.error("新增失败：" + errorMessage);
+        }
     }
 }
