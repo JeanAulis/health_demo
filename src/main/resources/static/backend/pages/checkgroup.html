@@ -332,9 +332,13 @@
                     };
                     //发送ajax请求，提交分页相关参数
                     axios.post("/checkgroup/findPage",param).then((res) => {
-                        //为VUE对象的模型数据赋值，基于双向数据绑定展示到页面
-                        this.dataList = res.data.rows;//当前页展示的数据集合
-                        this.pagination.total = res.data.total;//总数据量
+                        if(res.data.flag) {
+                            //为VUE对象的模型数据赋值，基于双向数据绑定展示到页面
+                            this.dataList = res.data.data.rows;//当前页展示的数据集合
+                            this.pagination.total = res.data.data.total;//总数据量
+                        } else {
+                            this.$message.error(res.data.message);
+                        }
                     });
                 },
                 // 重置表单
