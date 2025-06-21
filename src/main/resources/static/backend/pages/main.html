@@ -196,10 +196,33 @@
         },
         created(){
             //发送ajax请求，请求Controller获取当前登录用户的用户名，展示到页面中
-            axios.get("/user/getUsername").then((res) => {
+            // 从localStorage获取token
+            const token = localStorage.getItem('userToken');
+            
+            if (!token) {
+                // 如果没有token，重定向到登录页面
+                window.location.href = '/backend/login.html';
+                return;
+            }
+            
+            // 在请求头中携带token
+            axios.get("/user/getUsername", {
+                headers: {
+                    'Authorization': token
+                }
+            }).then((res) => {
                 if(res.data.flag){
                     this.username = res.data.data;
+                } else {
+                    // token无效，重定向到登录页面
+                    localStorage.removeItem('userToken');
+                    window.location.href = '/backend/login.html';
                 }
+            }).catch((error) => {
+                console.error('获取用户名失败:', error);
+                // 请求失败，可能是token过期，重定向到登录页面
+                localStorage.removeItem('userToken');
+                window.location.href = '/backend/login.html';
             });
         }
     });
