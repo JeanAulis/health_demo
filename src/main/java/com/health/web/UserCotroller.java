@@ -1,4 +1,4 @@
-package com.health.web.login;
+package com.health.web;
 
 import com.health.domain.dto.LoginDTO;
 import com.health.domain.entity.User;
@@ -41,7 +41,7 @@ public class UserCotroller {
             String redisKey = "user:token:" + token;
             redisTemplate.opsForValue().set(redisKey, user, 2, TimeUnit.HOURS);
             
-            log.info("用户登录成功，生成token：{}，用户：{}", token, user.getUsername());
+            log.info("用户登录成功，生成token为：{}，用户：{}", token, user.getUsername());
             
             // 返回token给前端
             return Result.success(token);

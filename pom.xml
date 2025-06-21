@@ -42,22 +42,18 @@
             <artifactId>druid-spring-boot-starter</artifactId>
             <version>1.2.12</version>
         </dependency>
-        <dependency>
+        <!-- mybatis-plus整合springboot的起步依赖 -->
+        <!-- 注释掉MyBatis和PageHelper，避免与MyBatis-Plus冲突 -->
+        <!--<dependency>
             <groupId>org.mybatis.spring.boot</groupId>
             <artifactId>mybatis-spring-boot-starter</artifactId>
             <version>2.3.0</version>
-        </dependency>
-        <!-- mybatis-plus整合springboot的起步依赖 -->
-        <!--<dependency>
-            <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
-            <version>3.5.3.1</version>
         </dependency>-->
-        <dependency>
+        <!--<dependency>
             <groupId>com.github.pagehelper</groupId>
             <artifactId>pagehelper-spring-boot-starter</artifactId>
             <version>1.4.5</version>
-        </dependency>
+        </dependency>-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

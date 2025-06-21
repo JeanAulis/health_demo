@@ -5,12 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-/**
- * 分页查询参数
- * @author ghy
- * @version 1.0.1
- * @since 2025-06-18 17:25
- */
 @Data
 @NoArgsConstructor  //无参构造器
 @AllArgsConstructor  //全参构造器
@@ -31,5 +25,7 @@ public class PageQueryDTO {
      * 查询条件
      */
     private String queryString;
+
+    private String name;
 
 }

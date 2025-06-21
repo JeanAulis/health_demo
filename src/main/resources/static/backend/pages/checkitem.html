@@ -305,8 +305,19 @@
                     axios.post("/checkitem/findPage", param).then((res)=>{
                         console.log(res.data);
                         //解析Controller响应回的数据，为模型数据赋值
-                        this.pagination.total = res.data.total;
-                        this.dataList = res.data.rows;
+                        if(res.data.flag){
+                            this.pagination.total = res.data.data.total;
+                            this.dataList = res.data.data.rows;
+                        }else{
+                            this.$message.error(res.data.message || '查询失败');
+                            this.pagination.total = 0;
+                            this.dataList = [];
+                        }
+                    }).catch((error) => {
+                        console.error('分页查询失败:', error);
+                        this.$message.error('网络请求失败，请稍后重试');
+                        this.pagination.total = 0;
+                        this.dataList = [];
                     });
                 },
                 // 重置表单
