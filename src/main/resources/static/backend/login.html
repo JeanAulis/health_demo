@@ -58,6 +58,9 @@
                             //把登录成功的用户信息保存到LocalStorage中
                             localStorage.setItem('token', JSON.stringify(res.data.data));
                             window.location.href='/backend/pages/main.html';
+                        } else {
+                            this.$message.error(res.data.message);
+                            this.user = {};
                         }
                     });
                 }
