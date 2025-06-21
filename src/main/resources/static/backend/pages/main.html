@@ -44,8 +44,8 @@
                                     <span style="display:block;">修改密码</span>
                                 </el-dropdown-item>
                                 <el-dropdown-item divided>
-                                        <span style="display:block;">
-                                            <a href="/user/logout">退出</a>
+                                        <span style="display:block;" @click="logout">
+                                            退出
                                         </span>
                                     </el-dropdown-item>
                             </el-dropdown-menu>
@@ -193,6 +193,37 @@
                     ]
                 }
             ]
+        },
+        methods: {
+            logout() {
+                const token = localStorage.getItem('userToken');
+                if (!token) {
+                    this.$message.warning('您还未登录');
+                    window.location.href = '/backend/login.html';
+                    return;
+                }
+                
+                // 发送登出请求
+                axios.get('/user/logout', {
+                    headers: {
+                        'Authorization': token
+                    }
+                }).then(res => {
+                    if (res.data.flag) {
+                        localStorage.removeItem('userToken');
+                        this.$message.success('登出成功');
+                        window.location.href = '/backend/login.html';
+                    } else {
+                        this.$message.error(res.data.message || '登出失败');
+                    }
+                }).catch(error => {
+                    console.error('登出请求失败:', error);
+                    // 即使请求失败，也清除本地token并跳转到登录页
+                    localStorage.removeItem('userToken');
+                    this.$message.error('登出失败，请稍后再试');
+                    window.location.href = '/backend/login.html';
+                });
+            }
         },
         created(){
             //发送ajax请求，请求Controller获取当前登录用户的用户名，展示到页面中
