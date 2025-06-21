@@ -25,7 +25,17 @@ public class UserCotroller {
     public Result login(@RequestBody LoginDTO loginDTO) {
         log.info("开始处理用户登录请求，参数：{}", loginDTO);
 
+        // 调用业务层处理登录
         Result result = userService.login(loginDTO);
+        
+        // 登录成功时，保存用户信息到session对象中
+        if (result.isFlag()) {
+            User user = (User) result.getData();
+            session.setAttribute("SESSION_USER", user);
+            log.info("用户登录成功，已保存到session：{}", user.getUsername());
+            // session.setMaxInactiveInterval(30 * 60); // 设置session存活时间为30分钟
+        }
+        
         return result;
     }
 
