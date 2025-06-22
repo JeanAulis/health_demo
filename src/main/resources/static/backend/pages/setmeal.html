@@ -202,7 +202,7 @@
 												</tr>
 												</thead>
 												<tbody>
-												<tr v-for="c in tableData">
+												<tr v-for="c in tableData" :key="c.id">
 													<td>
 														<input :id="c.id" v-model="checkgroupIds" type="checkbox" :value="c.id">
 													</td>
@@ -232,7 +232,7 @@
             el: '#app',
             data:{
                 autoUpload:true,//自动上传
-                imageUrl:'https://wangdehuo262823.oss-cn-hangzhou.aliyuncs.com/fd08fe012faf435284ff1bcd59682ba2.jpg',//模型数据，用于上传图片完成后图片预览
+                imageUrl:'',//模型数据，用于上传图片完成后图片预览
                 activeName:'first',//添加/编辑窗口Tab标签名称
                 pagination: {//分页相关属性
                     currentPage: 1,
@@ -252,9 +252,10 @@
             methods: {
                 //文件上传成功后的钩子，response为服务端返回的值，file为当前上传的文件封装成的js对象
                 handleAvatarSuccess(response, file) {
+                    console.log(response.data);
                     //为模型数据imageUrl赋值，用于页面图片预览
                     this.imageUrl = response.data;   //图片路径
-                    this.imageUrl = 'https://wangdehuo262823.oss-cn-hangzhou.aliyuncs.com/fd08fe012faf435284ff1bcd59682ba2.jpg';   //图片路径
+                    // this.imageUrl = 'https://wangdehuo262823.oss-cn-hangzhou.aliyuncs.com/fd08fe012faf435284ff1bcd59682ba2.jpg';   //图片路径
                     this.$message({
                         type:response.flag ? 'success':'error',
                         message:response.message
@@ -304,9 +305,17 @@
                     };
                     //请求后台
                     axios.post("/setmeal/findPage",param).then((response)=> {
-                        //为模型数据赋值，基于VUE的双向绑定展示到页面
-                        this.dataList = response.data.rows;
-                        this.pagination.total = response.data.total;
+                        console.log('分页查询返回数据:', response.data);
+                        if(response.data.flag){
+                            //为模型数据赋值，基于VUE的双向绑定展示到页面
+                            this.dataList = response.data.data.rows;
+                            this.pagination.total = response.data.data.total;
+                        }else{
+                            this.$message.error(response.data.message);
+                        }
+                    }).catch((error) => {
+                        console.error('分页查询失败:', error);
+                        this.$message.error('查询失败，请检查网络连接');
                     });
                 },
                 // 重置表单
@@ -318,7 +327,7 @@
                 },
                 // 弹出添加窗口
                 handleCreate() {
-                    //this.resetForm();
+                    this.resetForm();
                     this.dialogFormVisible = true;
                     //发送ajax请，查询所有的检查组数据，转为json展示到当前新增窗口中
                     axios.get("/checkgroup/findAll").then((res) => {

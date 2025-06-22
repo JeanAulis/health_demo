@@ -1,7 +1,6 @@
 package com.health.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,26 +13,27 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("t_checkitem")
-public class Checkitem implements Serializable {
+@TableName("t_Setmeal")
+public class Setmeal implements Serializable {
 
-
-    @TableId(type = IdType.AUTO)
     private Integer id;
+
+    private String name;
 
     private String code;
 
-    private String name;
+    @TableField("helpCode")
+    private String helpCode;
 
     private String sex;
 
     private String age;
 
-    private Float price;
+    private String price;
 
-    private String type;
+    private String remark;
 
     private String attention;
 
-    private String remark;
+    private String img;
 }
