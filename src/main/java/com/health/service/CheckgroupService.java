@@ -6,4 +6,6 @@ import com.health.domain.vo.Result;
 public interface CheckgroupService {
     
     Result findPage(PageQueryDTO pageQueryDTO);
+    
+    Result delete(Integer id);
 }
