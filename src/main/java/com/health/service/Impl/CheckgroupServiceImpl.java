@@ -4,6 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.health.domain.dto.CheckgroupDTO;
 import com.health.domain.entity.Checkgroup;
 import com.health.domain.query.PageQueryDTO;
 import com.health.domain.vo.PageBean;
@@ -14,9 +15,12 @@ import com.health.domain.entity.CheckgroupCheckitem;
 import com.health.service.CheckgroupService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -111,6 +115,72 @@ public class CheckgroupServiceImpl implements CheckgroupService {
             String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
             log.error("删除检查组失败: {}, id={}", errorMessage, id, e);
             return Result.error("删除失败：" + errorMessage);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result add(CheckgroupDTO checkgroupDTO) {
+        log.info("新增检查组，参数：{}", checkgroupDTO);
+
+        try {
+            // 参数校验
+            if (checkgroupDTO == null) {
+                log.warn("新增检查组失败：参数为空");
+                return Result.error("参数不能为空");
+            }
+
+            // 检查检查组编码是否已存在（如果提供了编码）
+            if (StrUtil.isNotBlank(checkgroupDTO.getCode())) {
+                LambdaQueryWrapper<Checkgroup> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Checkgroup::getCode, checkgroupDTO.getCode());
+                Checkgroup existingCheckgroup = checkgroupMapper.selectOne(wrapper);
+                
+                if (existingCheckgroup != null) {
+                    log.warn("检查组编码已存在：{}", checkgroupDTO.getCode());
+                    return Result.error("检查组编码已存在，请使用其他编码");
+                }
+            }
+
+            // 创建检查组实体
+            Checkgroup checkgroup = new Checkgroup();
+            BeanUtils.copyProperties(checkgroupDTO, checkgroup);
+
+            // 保存检查组基本信息
+            int result = checkgroupMapper.insert(checkgroup);
+            if (result <= 0) {
+                log.error("新增检查组失败，数据库操作返回0");
+                return Result.error("新增检查组失败");
+            }
+
+            // 处理检查组与检查项的关联关系
+            List<Integer> checkitemIds = checkgroupDTO.getCheckitemIds();
+            if (checkitemIds != null && !checkitemIds.isEmpty()) {
+                for (Integer checkitemId : checkitemIds) {
+                    if (checkitemId != null) {
+                        CheckgroupCheckitem relation = CheckgroupCheckitem.builder()
+                                .checkgroupId(checkgroup.getId())
+                                .checkitemId(checkitemId)
+                                .build();
+                        
+                        int relationResult = checkgroupCheckitemMapper.insert(relation);
+                        if (relationResult <= 0) {
+                            log.error("保存检查组与检查项关联关系失败，checkgroupId：{}，checkitemId：{}", 
+                                    checkgroup.getId(), checkitemId);
+                            throw new RuntimeException("保存检查组与检查项关联关系失败");
+                        }
+                    }
+                }
+                log.info("成功保存{}个检查组与检查项的关联关系", checkitemIds.size());
+            }
+
+            log.info("新增检查组成功，ID：{}", checkgroup.getId());
+            return Result.success("新增检查组成功");
+
+        } catch (Exception e) {
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
+            log.error("新增检查组失败: {}", errorMessage, e);
+            return Result.error("新增失败：" + errorMessage);
         }
     }
 }
