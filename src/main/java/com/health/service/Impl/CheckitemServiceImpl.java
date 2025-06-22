@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -91,6 +92,28 @@ public class CheckitemServiceImpl implements CheckitemService {
             String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
             log.error("新增检查项失败: {}", errorMessage, e);
             return Result.error("新增失败：" + errorMessage);
+        }
+    }
+
+    @Override
+    public Result findAll() {
+        log.info("查询所有检查项");
+
+        try {
+            // 构建查询条件，按照创建时间排序
+            LambdaQueryWrapper<Checkitem> wrapper = new LambdaQueryWrapper<>();
+            wrapper.orderByAsc(Checkitem::getId); // 按ID升序排列，确保结果稳定
+            
+            // 执行查询
+            List<Checkitem> checkitems = checkitemMapper.selectList(wrapper);
+            
+            log.info("查询所有检查项成功，共查询到[{}]条记录", checkitems.size());
+            return Result.success(checkitems);
+
+        } catch (Exception e) {
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
+            log.error("查询所有检查项失败: {}", errorMessage, e);
+            return Result.error("查询失败：" + errorMessage);
         }
     }
 }

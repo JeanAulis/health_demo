@@ -11,4 +11,6 @@ public interface CheckitemService {
     Result findPage(PageQueryDTO pageQueryDTO);
 
     Result add(Checkitem checkitem);
+    
+    Result findAll();
 }
