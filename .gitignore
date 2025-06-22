@@ -1,3 +1,4 @@
 .idea/
 target/
 src/main/java/com/health/utils/AliOssUtil.java
+assume-unchanged 忽略本地改动.md
