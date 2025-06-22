@@ -11,6 +11,12 @@
 
 项目登录页 http://localhost:8080/backend/login.html
 
+> [!WARNING]
+>
+> 自行配置，否则OSS无法生效
+>
+> ![image-20250622221611177](./readme.assets/image-20250622221611177.png)
+
 
 
 > 1、项目资源在data目录下
