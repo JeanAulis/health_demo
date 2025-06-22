@@ -1,5 +1,11 @@
 > [!IMPORTANT]
 >
+> JDK 11
+> 
+> Maven 3.9.9
+> 
+> Mysql 8.0.26
+> 
 > 此项目使用MybatisPlus,  已经注释掉MyBatis和PageHelper
 
 项目登录页 http://localhost:8080/backend/login.html
