@@ -1,11 +1,17 @@
+> [!CAUTION]
+>
+> 部分前端并未完善/存在小bug
+
+
+
 > [!IMPORTANT]
 >
 > JDK 11
-> 
+>
 > Maven 3.9.9
-> 
+>
 > Mysql 8.0.26
-> 
+>
 > 此项目使用MybatisPlus,  已经注释掉MyBatis和PageHelper
 
 
