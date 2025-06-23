@@ -33,12 +33,6 @@ public class CheckitemController {
         return checkitemService.add(checkitem);
     }
 
-    /**
-     * 查询所有检查项
-     * 用于下拉框选择等场景，返回所有启用的检查项数据
-     * 
-     * @return Result 包含所有检查项的列表
-     */
     @GetMapping("/checkitem/findAll")
     public Result findAll(){
         log.info("查询所有检查项请求");
