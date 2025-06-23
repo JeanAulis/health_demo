@@ -33,14 +33,33 @@ public class CheckgroupController {
         return checkgroupService.delete(id);
     }
 
-    /**
-     * 新增检查组
-     * @param checkgroupDTO 检查组信息和关联的检查项ID列表
-     * @return 操作结果
-     */
+    // 新增检查组
     @PostMapping("/checkgroup/add")
     public Result add(@RequestBody CheckgroupDTO checkgroupDTO) {
         log.info("新增检查组请求，参数：{}", checkgroupDTO);
         return checkgroupService.add(checkgroupDTO);
     }
+
+    // 编辑检查组
+    // ①回显ID
+    @GetMapping("/checkgroup/findById")
+    public Result findById(Integer id) {
+        log.info("编辑检查组请求，参数：{}", id);
+        return checkgroupService.findById(id);
+    }
+
+    // ②中间表查询
+    @GetMapping("/checkgroup/findCheckItemIdsByCheckGroupId")
+    public Result findCheckItemIdsByCheckGroupId(Integer id) {
+        log.info("查询检查组关联的检查项ID列表请求，参数：{}", id);
+        return checkgroupService.findCheckItemIdsByCheckGroupId(id);
+    }
+
+    // ③修改检查组（先删除后添加）
+    @PostMapping("/checkgroup/edit")
+    public Result edit(@RequestBody CheckgroupDTO checkgroupDTO, @RequestParam("checkitemIds") Integer[] checkitemIds) {
+        log.info("编辑检查组请求，参数：{}，检查项IDs：{}", checkgroupDTO, checkitemIds);
+        return checkgroupService.edit(checkgroupDTO, checkitemIds);
+    }
+
 }

@@ -183,4 +183,150 @@ public class CheckgroupServiceImpl implements CheckgroupService {
             return Result.error("新增失败：" + errorMessage);
         }
     }
+
+    @Override
+    public Result findById(Integer id) {
+        log.info("根据ID查询检查组，参数：{}", id);
+
+        try {
+            // 参数校验
+            if (id == null || id <= 0) {
+                log.warn("查询检查组失败：ID参数无效，id={}", id);
+                return Result.error("ID参数无效");
+            }
+
+            // 查询检查组信息
+            Checkgroup checkgroup = checkgroupMapper.selectById(id);
+            if (checkgroup == null) {
+                log.warn("查询检查组失败：检查组不存在，id={}", id);
+                return Result.error("检查组不存在");
+            }
+
+            log.info("查询检查组成功，id={}, name={}", id, checkgroup.getName());
+            return Result.success("查询成功", checkgroup);
+
+        } catch (Exception e) {
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
+            log.error("查询检查组失败: {}, id={}", errorMessage, id, e);
+            return Result.error("查询失败：" + errorMessage);
+        }
+    }
+
+    @Override
+    public Result findCheckItemIdsByCheckGroupId(Integer id) {
+        log.info("根据检查组ID查询关联的检查项ID列表，参数：{}", id);
+
+        try {
+            // 参数校验
+            if (id == null || id <= 0) {
+                log.warn("查询检查项ID列表失败：检查组ID参数无效，id={}", id);
+                return Result.error("检查组ID参数无效");
+            }
+
+            // 查询检查组是否存在
+            Checkgroup checkgroup = checkgroupMapper.selectById(id);
+            if (checkgroup == null) {
+                log.warn("查询检查项ID列表失败：检查组不存在，id={}", id);
+                return Result.error("检查组不存在");
+            }
+
+            // 查询关联的检查项ID列表
+            LambdaQueryWrapper<CheckgroupCheckitem> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(CheckgroupCheckitem::getCheckgroupId, id)
+                   .select(CheckgroupCheckitem::getCheckitemId);
+            
+            List<CheckgroupCheckitem> relations = checkgroupCheckitemMapper.selectList(wrapper);
+            
+            // 提取检查项ID列表
+            List<Integer> checkitemIds = relations.stream()
+                    .map(CheckgroupCheckitem::getCheckitemId)
+                    .collect(java.util.stream.Collectors.toList());
+
+            log.info("查询检查项ID列表成功，检查组id={}, 关联检查项数量={}", id, checkitemIds.size());
+            return Result.success("查询成功", checkitemIds);
+
+        } catch (Exception e) {
+            String errorMessage = Optional.ofNullable(e.getMessage()).orElse("未知错误");
+            log.error("查询检查项ID列表失败: {}, 检查组id={}", errorMessage, id, e);
+            return Result.error("查询失败：" + errorMessage);
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Result edit(CheckgroupDTO checkgroupDTO, Integer[] checkitemIds) {
+        log.info("编辑检查组，参数：{}, 检查项IDs：{}", checkgroupDTO, checkitemIds);
+
+        try {
+            // 参数校验
+            if (checkgroupDTO == null || checkgroupDTO.getId() == null) {
+                log.warn("编辑检查组失败：参数无效");
+                return Result.error("参数无效");
+            }
+
+            // 检查检查组是否存在
+            Checkgroup existingCheckgroup = checkgroupMapper.selectById(checkgroupDTO.getId());
+            if (existingCheckgroup == null) {
+                log.warn("编辑检查组失败：检查组不存在，id={}", checkgroupDTO.getId());
+                return Result.error("检查组不存在");
+            }
+
+            // 检查编码是否与其他检查组重复（排除自己）
+            if (StrUtil.isNotBlank(checkgroupDTO.getCode())) {
+                LambdaQueryWrapper<Checkgroup> wrapper = new LambdaQueryWrapper<>();
+                wrapper.eq(Checkgroup::getCode, checkgroupDTO.getCode())
+                       .ne(Checkgroup::getId, checkgroupDTO.getId());
+                Checkgroup duplicateCheckgroup = checkgroupMapper.selectOne(wrapper);
+                
+                if (duplicateCheckgroup != null) {
+                    log.warn("检查组编码已存在：{}", checkgroupDTO.getCode());
+                    return Result.error("检查组编码已存在，请使用其他编码");
+                }
+            }
+
+            // 1. 先删除原有的检查组与检查项的关联关系
+            QueryWrapper<CheckgroupCheckitem> deleteWrapper = new QueryWrapper<>();
+            deleteWrapper.eq("checkgroup_id", checkgroupDTO.getId());
+            checkgroupCheckitemMapper.delete(deleteWrapper);
+            log.info("删除检查组原有关联关系，检查组ID：{}", checkgroupDTO.getId());
+
+            // 2. 更新检查组基本信息
+            Checkgroup checkgroup = new Checkgroup();
+            checkgroup.setId(checkgroupDTO.getId());
+            checkgroup.setCode(checkgroupDTO.getCode());
+            checkgroup.setName(checkgroupDTO.getName());
+            checkgroup.setHelpCode(checkgroupDTO.getHelpCode());
+            checkgroup.setSex(checkgroupDTO.getSex());
+            checkgroup.setRemark(checkgroupDTO.getRemark());
+            checkgroup.setAttention(checkgroupDTO.getAttention());
+            
+            int updateResult = checkgroupMapper.updateById(checkgroup);
+            if (updateResult <= 0) {
+                log.warn("更新检查组信息失败，检查组ID：{}", checkgroupDTO.getId());
+                return Result.error("更新检查组信息失败");
+            }
+            log.info("更新检查组基本信息成功，检查组ID：{}", checkgroupDTO.getId());
+
+            // 3. 添加新的检查组与检查项的关联关系
+            if (checkitemIds != null && checkitemIds.length > 0) {
+                for (Integer checkitemId : checkitemIds) {
+                    if (checkitemId != null && checkitemId > 0) {
+                        CheckgroupCheckitem relation = new CheckgroupCheckitem();
+                        relation.setCheckgroupId(checkgroupDTO.getId());
+                        relation.setCheckitemId(checkitemId);
+                        checkgroupCheckitemMapper.insert(relation);
+                    }
+                }
+                log.info("添加检查组新关联关系成功，检查组ID：{}，关联检查项数量：{}", 
+                        checkgroupDTO.getId(), checkitemIds.length);
+            }
+
+            log.info("编辑检查组成功，检查组ID：{}", checkgroupDTO.getId());
+            return Result.success("编辑检查组成功");
+            
+        } catch (Exception e) {
+            log.error("编辑检查组失败", e);
+            return Result.error("编辑检查组失败：" + e.getMessage());
+        }
+    }
 }
