@@ -106,6 +106,14 @@
             <version>2.3.3</version>
         </dependency>
 
+<!--        短信服务 -->
+        <dependency>
+            <groupId>com.aliyun</groupId>
+            <artifactId>alibabacloud-dysmsapi20170525</artifactId>
+            <version>4.0.2</version>
+        </dependency>
+
+
     </dependencies>
 
 
